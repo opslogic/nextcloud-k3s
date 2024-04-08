@@ -1,0 +1,21 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nextcloud
+  namespace: nextcloud
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nextcloud.tofubox.io`)
+      kind: Rule
+      services:
+        - name: nextcloud
+          port: 80
+      middlewares:
+        - name: nextcloud-headers
+        - name: nextcloud-redirectregex
+  tls:
+    secretName: tofubox-io-tls

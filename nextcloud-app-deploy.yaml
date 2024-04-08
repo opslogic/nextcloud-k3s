@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextcloud                  # < name of the deploymentand reference
+  namespace: nextcloud             # < namespace where to place the deployment and pods
+  labels:                         
+    app: nextcloud                 # < label for tagging and reference
+spec:
+  replicas: 1                      # < number of pods to deploy
+  selector:
+    matchLabels:
+      app: nextcloud
+  strategy:
+    rollingUpdate:
+      maxSurge: 0                  # < The number of pods that can be created above the desired amount of pods during an update
+      maxUnavailable: 1            # < The number of pods that can be unavailable during the update process
+    type: RollingUpdate            # < New pods are added gradually, and old pods are terminated gradually
+  template:
+    metadata:
+      labels:
+        app: nextcloud
+    spec:
+      containers:
+        - image: nextcloud:apache
+          name: nextcloud                    # < name of container
+          imagePullPolicy: Always            # < always use the latest image when creating container/pod
+          ports:
+            - containerPort: 80
+          env:                               # < environment variables. See https://hub.docker.com/r/linuxserver/nextcloud
+            - name: REDIS_HOST
+              value: redis
+            - name: MYSQL_HOST 
+              value: mariadb
+            - name: MYSQL_DATABASE 
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_DATABASE
+                  name: nextcloud-db-secret
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_PASSWORD
+                  name: nextcloud-db-secret
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_USER
+                  name: nextcloud-db-secret
+            - name: NEXTCLOUD_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: MYSQL_PASSWORD
+                  name: nextcloud-db-secret
+            - name: NEXTCLOUD_ADMIN_USER
+              value: "admin"
+            - name: NEXTCLOUD_TRUSTED_DOMAINS
+              value: ${LoadBalancer}
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: nextcloud-persistent-storage
+      volumes:
+      - name: nextcloud-persistent-storage
+        persistentVolumeClaim:
+          claimName: nextcloud-server-pvc

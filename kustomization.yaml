@@ -1,0 +1,27 @@
+resources: 
+
+# Clusterissuer for certmanager
+# - nextcloud-letsencrypt-prod.yaml
+
+# Ingress
+- nextcloud-ingress-route.yaml
+
+# Persistent volume claims
+- nextcloud-db-pvc.yaml
+- nextcloud-app-pvc.yaml
+
+# Services
+- nextcloud-db-svc.yaml
+- nextcloud-redis-svc.yaml
+- nextcloud-app-svc.yaml
+
+# Secrets
+- nextcloud-db-secret.yaml
+
+# Deployments
+- nextcloud-redis-deployment.yaml
+- nextcloud-db-deploy.yaml
+- nextcloud-app-deploy.yaml
+
+
+
